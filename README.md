@@ -1,0 +1,2 @@
+# linkGenerator
+Created with CodeSandbox
