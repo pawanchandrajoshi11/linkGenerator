@@ -14,12 +14,12 @@ export default function FileGenerator() {
     transformedString: string;
     extractedLinks: AMMLinkData[];
   } {
-    const startToken = "amm_link_start";
-    const endToken = "amm_link_end";
-
     // Regex to match and extract AMM links
+    const escapedStartToken = AMMLinkTokens.start.replace(/[\[\]]/g, "\\$&");
+    const escapedEndToken = AMMLinkTokens.end.replace(/[\[\]]/g, "\\$&");
+
     const regex = new RegExp(
-      `\\[\\[${startToken}\\]\\]\\s*(\\w+)\\s*([\\dA-Z-]+)\\s*([^\\[\\]]+)\\s*\\[\\[${endToken}\\]\\]`,
+      `${escapedStartToken}\\s*(\\w+)\\s+([\\dA-Z-]+)\\s+([^\\[\\]]+)\\s*${escapedEndToken}`,
       "g"
     );
 
@@ -29,9 +29,7 @@ export default function FileGenerator() {
       (_match, searchCategory, reference, label) => {
         extractedLinks.push({ searchCategory, reference, label: label.trim() });
 
-        return `<a href="https://google.com/${reference}/${encodeURIComponent(
-          label.trim()
-        )}" target="_blank">${reference}</a>`;
+        return `<a href="https://google.com/${reference}/" target="_blank">${reference} ${label}</a>`;
       }
     );
 
@@ -39,13 +37,11 @@ export default function FileGenerator() {
   }
 
   const inputString = `
-      hey there [[amm_link_start]] AMM 21-52-46-256-001-A Inspection of Forward Cargo [[amm_link_end]]
-      yolo hey there [[amm_link_start]] ABC 24-52-46-156-011-A Inspection of Forward Cargo [[amm_link_end]]
-      third value hey there [[amm_link_start]] GHZ 21-52-46-246-001-A Inspection of Forward Cargo [[amm_link_end]]
-    `;
+      hey there Z 21-52-46-246-001-A Inspection of Forward Car hey there [[amm_link_start]] AMM 21-52-46-256-001-A Inspection of Forward Cargo [[amm_link_end]]
+      yolo hey there [[amm_link_start]] ABC 24-52-46-156-011-A Inspection [[amm_link_end]]
+      third value hey there [[amm_link_start]] GHZ 21-52-46-246-001-A Cargo [[amm_link_end]]`;
 
   const result = processAMMLinks(inputString);
-  console.log("Processed Result:", result); // ✅ Debugging output
 
   return (
     <div>
